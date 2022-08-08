@@ -47,8 +47,8 @@ def get_authors_details(each_quote):
         }
     return authors_details_obj
         
-def get_quotes_details(i):
-    crawling_data=requests.get("http://quotes.toscrape.com/page/"+str(i)+"/")
+def get_quotes_and_author_details(url):
+    crawling_data=requests.get(url)
     soup = BeautifulSoup(crawling_data.content,"html.parser")
     quotes_details = soup.find_all("div", class_="quote")
     
@@ -60,22 +60,40 @@ def get_quotes_details(i):
     for each_quote in quotes_details:
         each_quote_details=get_each_quote_details(each_quote)
         authors_details=get_authors_details(each_quote)
-        quotes_data["quotes"].append(each_quote_details)   
+        quotes_data["quotes"].append(each_quote_details)  
         quotes_data["authors"].append(authors_details)
           
     return quotes_data    
 
-all_quotes_data={
+def get_crawling_data_from_website():
+    all_quotes_data={
     "quotes":[],
     "authors":[]
-}
-
-for i in range(1,11):
-    quotes_data=get_quotes_details(i)
-    all_quotes_data["quotes"].extend(quotes_data["quotes"])
-    all_quotes_data["authors"].extend(quotes_data["authors"])
+    }
+    website_url = "http://quotes.toscrape.com/"
+    while True:
+        quotes_data = get_quotes_and_author_details(website_url)
+        all_quotes_data["quotes"].extend(quotes_data["quotes"])
+        all_quotes_data["authors"].extend(quotes_data["authors"])
+        
+        
+        data =requests.get(website_url)
+        soup = BeautifulSoup(data.content,"html.parser")
+        next_button= soup.find("li", class_="next")
+        if next_button == None:
+            return all_quotes_data
+        else:
+            anchor_elemenet = next_button.find("a")
+            button_link = anchor_elemenet.get("href")
+            website_url = "http://quotes.toscrape.com"+button_link
     
-json_file=json.dumps(all_quotes_data,indent=4)       
 
-with open("quotes.json", "w") as f:
-    json.dump(json_file,f)
+
+def get_all_quotes_data():
+    all_quotes_data = get_crawling_data_from_website() 
+    json_file=json.dumps(all_quotes_data,)      
+    with open("quotes.json", "w") as f:
+        json.dump(json_file,f)
+
+        
+get_all_quotes_data()

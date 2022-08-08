@@ -4,10 +4,6 @@ from unittest import result
 conn = sqlite3.connect("quotes.db")
 cursor_obj = conn.cursor()
 
-#cursor_obj.execute("""SELECT * FROM authors""")
-#results = cursor_obj.fetchall()
-#print(results)
-
 
 #1. return total no of quotations on the wbsite
 
@@ -15,45 +11,50 @@ def get_total_no_of_quotations():
     cursor_obj.execute(""" SELECT COUNT(quote_id) FROM quotes""")
     result = cursor_obj.fetchall()
     count, = result[0]
-    return count
+    print("Totl no of quotations: "+str(count))
 
-total_quotations = get_total_no_of_quotations()
-print(total_quotations)
+get_total_no_of_quotations()
 
+ 
 #2. total quotation by author
 
 def get_no_of_quotes_by_author():
-    # am taking name as Albert Einstein, we can read any name with input() function
- 
-    cursor_obj.execute(""" SELECT COUNT(author) FROM authors WHERE author = "Albert Einstein" """)
+    user_input = input("ENTER AUTHOR NAME: ")
+    author_name = (user_input,)
+    
+    cursor_obj.execute(""" SELECT COUNT(quote_id) FROM quotes INNER JOIN
+                                authors on quotes.author_id = authors.author_id WHERE authors.author LIKE ? """, author_name)
     result = cursor_obj.fetchall()
-    result, = result[0]
-    return result
+    total_quotes, = result[0]
 
-no_of_quotations_by_author = get_no_of_quotes_by_author()
-print(no_of_quotations_by_author)
+    print("Total Quotations by "+user_input+" are: "+str(total_quotes))
+get_no_of_quotes_by_author()
+
 
 #3.Return Minimum, Maximum, and Average no. of tags on the quotations
 
 def get_min_max_avg_no_of_tags_on_quotatins():
-    cursor_obj.execute(""" SELECT MIN(tags_count), MAX(tags_count), avg(tags_count) FROM tags """)
+    cursor_obj.execute(""" SELECT MIN(no_of_tags_used), MAX(no_of_tags_used), avg(no_of_tags_used) FROM quotes """)
     results = cursor_obj.fetchall()
     results = results[0]
     (min_tags, max_tags, avg_of_tags) = results
-    min = "min tags: "+str(min_tags)
-    max = "max tags: "+str(max_tags)
-    avg = "avg of tags: "+str(avg_of_tags)
-    return min,max,avg
+    min = "  min tags: "+str(min_tags)
+    max = "  max tags: "+str(max_tags)
+    avg = "  avg of tags: "+str(avg_of_tags)
+    print(min,max,avg)
 
-result = get_min_max_avg_no_of_tags_on_quotatins()
-print(result)
+get_min_max_avg_no_of_tags_on_quotatins()
+
 
 #4.Given a number N return top N authors who authored the maximum number of quotations sorted in descending order of no. of quotes
 
 def get_who_authored_max_num_of_quotations():
-    cursor_obj.execute(""" SELECT author, COUNT(author) AS no_of_quotes FROM authors GROUP BY author ORDER BY no_of_quotes DESC LIMIT 5 """)
+    user_input = int(input("ENTER NUMBER: "))
+    number = (user_input,)
+    cursor_obj.execute(""" SELECT author, COUNT(author) AS no_of_quotes FROM authors INNER JOIN quotes ON 
+                       authors.author_id = quotes.author_id GROUP BY author ORDER BY no_of_quotes DESC LIMIT ? """,number)
     result = cursor_obj.fetchall()
-    return result
+    print(result)
 
-result = get_who_authored_max_num_of_quotations()
-print(result)
+get_who_authored_max_num_of_quotations()
+
