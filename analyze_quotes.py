@@ -49,5 +49,5 @@ def get_answers_for_given_questions():
     get_no_of_quotes_by_author(cursor_obj)
     get_min_max_avg_no_of_tags_on_quotatins(cursor_obj)
     get_who_authored_max_num_of_quotations(cursor_obj)
-""
+
 get_answers_for_given_questions()
